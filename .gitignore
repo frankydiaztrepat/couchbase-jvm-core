@@ -6,4 +6,4 @@ classes/
 build/
 target/
 **/.DS_Store
-/.nb-gradle/private/
+.nb-gradle
