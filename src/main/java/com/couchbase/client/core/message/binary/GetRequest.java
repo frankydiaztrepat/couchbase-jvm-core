@@ -21,6 +21,9 @@
  */
 package com.couchbase.client.core.message.binary;
 
+import com.couchbase.client.core.stats.MeasuredOperations;
+import com.couchbase.client.core.stats.Measurements;
+
 /**
  * Fetch a document from the cluster and return it if found.
  *
@@ -48,6 +51,7 @@ public class GetRequest extends AbstractBinaryRequest {
         this.lock = lock;
         this.touch = touch;
         this.expiry = expiry;
+        Measurements.recorder().record(getClass().getName(), MeasuredOperations.CREATED, System.currentTimeMillis());
     }
 
     public boolean lock() {

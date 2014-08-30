@@ -21,6 +21,8 @@
  */
 package com.couchbase.client.core.message;
 
+import com.couchbase.client.core.stats.MeasuredOperations;
+import com.couchbase.client.core.stats.Measurements;
 import rx.subjects.AsyncSubject;
 import rx.subjects.Subject;
 
@@ -46,6 +48,11 @@ public abstract class AbstractCouchbaseRequest implements CouchbaseRequest {
      * The password of the bucket for this request.
      */
     private final String password;
+    
+    /**
+     * The timestamp in which the request was created.
+     */
+    private final long createdOn;
 
     /**
      * Create a new {@link AbstractCouchbaseRequest}.
@@ -72,12 +79,14 @@ public abstract class AbstractCouchbaseRequest implements CouchbaseRequest {
      *
      * @param bucket the name of the bucket.
      * @param password the password of the bucket.
+     * @param observable the observable which will complete the response.
      */
-    protected AbstractCouchbaseRequest(final String bucket, final String password,
-        final Subject<CouchbaseResponse, CouchbaseResponse> observable) {
+    protected AbstractCouchbaseRequest(final String bucket, final String password, final Subject<CouchbaseResponse, CouchbaseResponse> observable) {
         this.bucket = bucket;
         this.password = password;
         this.observable = observable;
+        this.createdOn = System.currentTimeMillis();
+        Measurements.recorder().record(getClass().getName(), MeasuredOperations.CREATED, this.createdOn);
     }
 
     @Override
@@ -93,5 +102,10 @@ public abstract class AbstractCouchbaseRequest implements CouchbaseRequest {
     @Override
     public String password() {
         return password;
+    }
+
+    @Override
+    public long createdOn() {
+        return createdOn;
     }
 }

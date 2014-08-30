@@ -53,5 +53,11 @@ public interface CouchbaseRequest extends CouchbaseMessage {
      * @return the password.
      */
     String password();
+    
+    /**
+     * The timestamp corresponding to the creation of this request.
+     * @return the timestamp.
+     */
+    long createdOn();
 
 }
