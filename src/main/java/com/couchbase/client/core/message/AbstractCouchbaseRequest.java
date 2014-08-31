@@ -21,8 +21,6 @@
  */
 package com.couchbase.client.core.message;
 
-import com.couchbase.client.core.stats.MeasuredOperations;
-import com.couchbase.client.core.stats.Measurements;
 import rx.subjects.AsyncSubject;
 import rx.subjects.Subject;
 
@@ -86,7 +84,6 @@ public abstract class AbstractCouchbaseRequest implements CouchbaseRequest {
         this.password = password;
         this.observable = observable;
         this.createdOn = System.currentTimeMillis();
-        Measurements.recorder().record(getClass().getName(), MeasuredOperations.CREATED, this.createdOn);
     }
 
     @Override

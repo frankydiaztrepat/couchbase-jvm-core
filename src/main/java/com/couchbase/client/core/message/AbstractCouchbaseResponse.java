@@ -21,9 +21,6 @@
  */
 package com.couchbase.client.core.message;
 
-import com.couchbase.client.core.stats.MeasuredOperations;
-import com.couchbase.client.core.stats.Measurements;
-
 /**
  * The default representation of a {@link CouchbaseResponse}.
  *
@@ -48,9 +45,6 @@ public abstract class AbstractCouchbaseResponse implements CouchbaseResponse {
     protected AbstractCouchbaseResponse(final ResponseStatus status, final CouchbaseRequest request) {
         this.status = status;
         this.request = request;
-        Measurements.recorder().record(getClass().getName(), MeasuredOperations.CREATED, System.currentTimeMillis());
-        if(request != null && request.createdOn() > 0)
-            Measurements.recorder().record(getClass().getName(), MeasuredOperations.REQUEST_RESPONSE_CREATION_CYCLE, System.currentTimeMillis() - request.createdOn());
     }
 
     @Override

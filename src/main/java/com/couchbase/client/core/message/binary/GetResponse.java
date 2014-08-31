@@ -23,8 +23,6 @@ package com.couchbase.client.core.message.binary;
 
 import com.couchbase.client.core.message.CouchbaseRequest;
 import com.couchbase.client.core.message.ResponseStatus;
-import com.couchbase.client.core.stats.MeasuredOperations;
-import com.couchbase.client.core.stats.Measurements;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
 
@@ -43,7 +41,6 @@ public class GetResponse extends AbstractBinaryResponse {
         super(status, bucket, content, request);
         this.cas = cas;
         this.flags = flags;
-        Measurements.recorder().record(getClass().getName(), MeasuredOperations.CREATED, System.currentTimeMillis());
     }
 
     public long cas() {
