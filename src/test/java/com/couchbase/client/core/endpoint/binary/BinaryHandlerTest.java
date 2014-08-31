@@ -39,8 +39,6 @@ import com.couchbase.client.core.message.binary.ReplicaGetRequest;
 import com.couchbase.client.core.message.binary.TouchRequest;
 import com.couchbase.client.core.message.binary.UnlockRequest;
 import com.couchbase.client.core.message.binary.UpsertRequest;
-import com.couchbase.client.core.stats.Measurements;
-import com.couchbase.client.core.stats.Record;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -56,7 +54,6 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -332,8 +329,6 @@ public class BinaryHandlerTest {
         assertEquals(30, outbound.getExtras().readInt());
         assertEquals(18, outbound.getTotalBodyLength());
         assertEquals("content", outbound.content().toString(CharsetUtil.UTF_8));
-        for(Record record: Measurements.recorder().records())
-            System.out.println(String.format("record for %s and operation %s with value %d ", record.caller(), record.operation().name(), record.value()));
         ReferenceCountUtil.release(content);
     }
 
@@ -545,8 +540,6 @@ public class BinaryHandlerTest {
         assertEquals(123, inbound.flags());
         assertEquals("content", inbound.content().toString(CharsetUtil.UTF_8));
         assertTrue(queue.isEmpty());
-        for(Record record: Measurements.recorder().records())
-            System.out.println(String.format("record for %s and operation %s with value %d ", record.caller(), record.operation().name(), record.value()));
         ReferenceCountUtil.release(content);
     }
 
