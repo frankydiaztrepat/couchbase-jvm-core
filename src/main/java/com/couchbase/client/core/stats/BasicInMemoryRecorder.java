@@ -69,4 +69,9 @@ public class BasicInMemoryRecorder implements OperationRecorder {
         this.currentRecords = 0;
     }
 
+    @Override
+    public void publish(Publisher publisher) {
+        publisher.publishRecords(this.records());
+    }
+
 }

@@ -18,38 +18,46 @@ package com.couchbase.client.core.stats;
  *
  * @author franky
  */
-public class Measurements implements OperationRecorder {
+public class Measurements {
     private static final Measurements INSTANCE;
-    private OperationRecorder operationsRecorder;
+    private final OperationRecorder timelineRecorder;
+    private final OperationRecorder latencyRecorder;
+    private final OperationRecorder volumeRecorder;
     
     static {
         INSTANCE = new Measurements();
     }
 
     /**
-     * @return the INSTANCE
+     * Returns the latency recorder to trace operation latency. 
+     * Values given to the recorder must reflect time span measurements.
+     * @return An OperationRecorder implementing instance that records latency operations.
      */
-    public static OperationRecorder recorder() {
-        return INSTANCE;
+    public static OperationRecorder latency() {
+        return INSTANCE.latencyRecorder;
+    }
+    
+    /**
+     * Returns the time-line recorder to trace operations as they occur. 
+     * Values given to the recorder must reflect timestamp measurements.
+     * @return An OperationRecorder implementing instance that records operations as they happen on an execution time-line.
+     */
+    public static OperationRecorder timeline() {
+        return INSTANCE.timelineRecorder;
+    }
+    
+    /**
+     * Returns the volume recorder to trace operation volume (request/response packet size, queue sizes, etc) as they increase and decrease. 
+     * Values given to the recorder must reflect size measurements.
+     * @return An OperationRecorder implementing instance that records volume for operations as they increase or decrease.
+     */
+    public static OperationRecorder volume() {
+        return INSTANCE.volumeRecorder;
     }
     
     private Measurements() {
-        this.operationsRecorder = new BasicInMemoryRecorder();
+        this.timelineRecorder = new BasicInMemoryRecorder();
+        this.latencyRecorder = new HdrHistogramLatencyRecorder();
+        this.volumeRecorder = new HdrHistogramLatencyRecorder();
     }
-    
-    @Override
-    public void record(final String caller, final MeasuredOperations operation, final long value) {
-        this.operationsRecorder.record(caller, operation, value);
-    }
-
-    @Override
-    public Iterable<Record> records() {
-        return this.operationsRecorder.records();
-    }
-
-    @Override
-    public void reset() {
-        this.operationsRecorder.reset();
-    }
-
 }

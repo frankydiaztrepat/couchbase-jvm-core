@@ -13,30 +13,24 @@
  */
 package com.couchbase.client.core.stats;
 
+import java.util.Map;
+import org.HdrHistogram.Histogram;
+
 /**
- * Represents a basic operation recording functionality. It records MeasurementOperations with a timestamp.
+ * Represents the basic contract to publish Measurements
  * @author franky
  */
-public interface OperationRecorder {
+public interface Publisher {
 
     /**
-     * Records the given operation
-     * @param caller the caller who originated the record, or for which the value is being recorded.
-     * @param operation the MeasureOperation for which the recorded value is actually recorded for.
-     * @param value A long containing the value of the record.
+     * Publishes a range of records given to the publisher.
+     * @param records The records to be published.
      */
-    public void record(final String caller, final MeasuredOperations operation, final long value);
-
-    /**
-     * Returns an iterable object that can be use to iterate through the OperationRecord instances saved.
-     * @return a Record implementing instance.
-     */
-    public Iterable<Record> records();
+    public void publishRecords(final Iterable<Record> records);
     
     /**
-     * Resets the recorder to a cleared state, ready to begin recording again. 
+     * Publishes the given map considering the key as the X (reason/object/measure) for which the corresponding Histogram was assigned.
+     * @param histograms For now an org.HdrHistogram.Histogram instance. NOTE: This should and will be a interface.
      */
-    public void reset();
-    
-    public void publish(final Publisher publisher);
+    public void publishHistograms(final Map<String, Histogram> histograms);
 }

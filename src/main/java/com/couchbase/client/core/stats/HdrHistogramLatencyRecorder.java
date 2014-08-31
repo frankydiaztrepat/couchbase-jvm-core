@@ -13,8 +13,11 @@
  */
 package com.couchbase.client.core.stats;
 
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import org.HdrHistogram.Histogram;
+import org.HdrHistogram.HistogramIterationValue;
 
 /**
  * Represents a latency focused recorder that uses Gil Tene's High Dynamic Range Histogram to eliminate coordinated omissions.
@@ -23,6 +26,7 @@ import org.HdrHistogram.Histogram;
  */
 public class HdrHistogramLatencyRecorder implements OperationRecorder {
 
+    private static final String CALLER_OPERATION_SEPARATOR = "#";
     private static final long ONE_MINUTE_IN_NANOSECONDS = 60000000000L;
     private static final int DEFAULT_LIMIT = 2000000;
     private final int maximunRecords;
@@ -48,27 +52,40 @@ public class HdrHistogramLatencyRecorder implements OperationRecorder {
 
     @Override
     public void record(final String caller, final MeasuredOperations operation, final long value) {
-        
+
         // check limit
         if (currentRecords >= maximunRecords) {
             return;
         }
-        
-        if(this.histograms.get(caller+"_"+operation.name()) == null)
-            this.histograms.put(caller+"_"+operation.name(), new Histogram(5, ONE_MINUTE_IN_NANOSECONDS, currentRecords));
-        
-        this.histograms.get(caller+"_"+operation.name()).recordValue(value);
+
+        if (this.histograms.get(caller + CALLER_OPERATION_SEPARATOR + operation.name()) == null) {
+            this.histograms.put(caller + CALLER_OPERATION_SEPARATOR + operation.name(), new Histogram(ONE_MINUTE_IN_NANOSECONDS, 3));
+        }
+
+        this.histograms.get(caller + CALLER_OPERATION_SEPARATOR + operation.name()).recordValue(value);
         currentRecords++;
     }
 
     @Override
     public Iterable<Record> records() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final LinkedList<Record> allRecords = new LinkedList<Record>();
+        for (String histogramKey : this.histograms.keySet()) {
+            for (HistogramIterationValue recordedValue : this.histograms.get(histogramKey).recordedValues()) {
+                String[] callerAndOperation = histogramKey.split(Pattern.quote(CALLER_OPERATION_SEPARATOR));
+                allRecords.add(new OperationRecord(callerAndOperation[0], MeasuredOperations.valueOf(callerAndOperation[1]), recordedValue.getTotalValueToThisValue()));
+            }
+        }
+        return allRecords;
     }
 
     @Override
     public void reset() {
         this.histograms.clear();
+    }
+
+    @Override
+    public void publish(Publisher publisher) {
+        publisher.publishHistograms(this.histograms);
     }
 
 }
